@@ -130,17 +130,23 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById('user-email').textContent = user.email;
-      } else {
-        window.location.href = "https://talkhausdevs.github.io/heartbreakrehab/";
-      }
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            document.getElementById('user-email').textContent = user.email;
+          } else {
+            if (!window.location.hash.includes('loggedout')) {
+              window.location.href = "https://talkhausdevs.github.io/heartbreakrehab/";
+            }
+          }
+        });
+      }, 500);
     });
 
     document.getElementById('logout').addEventListener('click', () => {
       signOut(auth).then(() => {
-        window.location.href = "https://talkhausdevs.github.io/heartbreakrehab/";
+        window.location.href = "https://talkhausdevs.github.io/heartbreakrehab/#loggedout";
       }).catch((error) => {
         alert(error.message);
       });
