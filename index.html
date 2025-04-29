@@ -86,8 +86,10 @@
   </style>
 </head>
 <body>
+
   <div class="auth-box">
     <h1 id="form-title">Hey softie 👀</h1>
+
     <div id="login-form">
       <input type="email" placeholder="Email">
       <input type="password" placeholder="Password">
@@ -96,6 +98,7 @@
         New here? <a onclick="toggleForm('signup')">Sign up</a>
       </div>
     </div>
+
     <div id="signup-form" class="hidden">
       <input type="text" placeholder="Username">
       <input type="email" placeholder="Email">
@@ -117,6 +120,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
@@ -130,26 +134,39 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     document.addEventListener("DOMContentLoaded", () => {
-      document.querySelector('#signup-form button').addEventListener('click', (e) => {
+      document.querySelector('#signup-form button').addEventListener('click', async (e) => {
         e.preventDefault();
-        const email = document.querySelector('#signup-form input[type="email"]').value;
-        const password = document.querySelector('#signup-form input[type="password"]').value;
-        createUserWithEmailAndPassword(auth, email, password)
-          .then(() => {
-            alert("Welcome to your soft era 💖");
-            window.location.href = "dashboard.html";
-          })
-          .catch((error) => {
-            alert(error.message);
+        const username = document.querySelector('#signup-form input[placeholder="Username"]').value;
+        const email = document.querySelector('#signup-form input[placeholder="Email"]').value;
+        const password = document.querySelector('#signup-form input[placeholder="Password"]').value;
+        const healingStage = document.querySelector('#signup-form select').value;
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+
+          await setDoc(doc(db, "users", user.uid), {
+            username,
+            email,
+            healingStage,
+            createdAt: serverTimestamp()
           });
+
+          alert("Welcome to your soft era 💖");
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          alert(error.message);
+        }
       });
 
       document.querySelector('#login-form button').addEventListener('click', (e) => {
         e.preventDefault();
         const email = document.querySelector('#login-form input[type="email"]').value;
         const password = document.querySelector('#login-form input[type="password"]').value;
+
         signInWithEmailAndPassword(auth, email, password)
           .then(() => {
             alert("Welcome back, softie 🫶");
