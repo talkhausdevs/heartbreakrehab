@@ -134,13 +134,13 @@
       if (user) {
         document.getElementById('user-email').textContent = user.email;
       } else {
-        window.location.href = "index.html";
+        window.location.href = "https://talkhausdevs.github.io/heartbreakrehab/";
       }
     });
 
     document.getElementById('logout').addEventListener('click', () => {
       signOut(auth).then(() => {
-        window.location.href = "index.html";
+        window.location.href = "https://talkhausdevs.github.io/heartbreakrehab/";
       }).catch((error) => {
         alert(error.message);
       });
