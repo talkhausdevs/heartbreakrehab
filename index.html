@@ -12,6 +12,7 @@
       font-family: 'Poppins', sans-serif;
       overflow-x: hidden;
       background: #FFD7D7;
+      scroll-behavior: smooth;
     }
 
     .hero {
@@ -92,6 +93,78 @@
     .sparkle:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
     .sparkle:nth-child(2) { top: 30%; right: 25%; animation-delay: 2s; }
     .sparkle:nth-child(3) { bottom: 20%; left: 30%; animation-delay: 4s; }
+
+    .section {
+      padding: 60px 20px;
+      text-align: center;
+      background: #FFF3EC;
+    }
+
+    .section h2 {
+      font-size: 2.5em;
+      color: #5E4B56;
+      margin-bottom: 40px;
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .step {
+      background: #FFD7D7;
+      padding: 20px;
+      border-radius: 20px;
+      width: 250px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .step h3 {
+      color: #B4DDEE;
+      margin-bottom: 10px;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: #FFD7D7;
+      padding: 20px;
+      border-radius: 20px;
+      width: 250px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .soft-room {
+      background: #C7B1DD;
+      padding: 60px 20px;
+      text-align: center;
+      color: #FFF3EC;
+    }
+
+    .call-to-action {
+      background: #FFD7D7;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .call-to-action h2 {
+      color: #5E4B56;
+      margin-bottom: 20px;
+    }
+
+    .footer {
+      background: #5E4B56;
+      color: #FFF3EC;
+      padding: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -104,10 +177,64 @@
       <h1>You’re not too broken to be loved.</h1>
       <p>Unpack the past. Soft-launch the future.</p>
       <div class="buttons">
-        <a href="#" class="btn pink">Start Healing</a>
-        <a href="#" class="btn lavender">Browse Soft Room</a>
+        <a href="#how" class="btn pink">Start Healing</a>
+        <a href="#softroom" class="btn lavender">Browse Soft Room</a>
       </div>
     </div>
+  </div>
+
+  <div class="section" id="how">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step">
+        <h3>1. Choose Your Stage</h3>
+        <p>Where you are in your healing journey matters.</p>
+      </div>
+      <div class="step">
+        <h3>2. Unpack the Baggage</h3>
+        <p>Share your truth gently and playfully.</p>
+      </div>
+      <div class="step">
+        <h3>3. Connect Consciously</h3>
+        <p>Find others ready for soft, slow love.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Features</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>Healing Paths</h3>
+        <p>Pick your emotional stage, meet matches who get it.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Emotional Baggage Game</h3>
+        <p>Unpack your past with playful prompts.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Ghost-Proof Messaging</h3>
+        <p>Leave with closure, not confusion.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Guided Journaling</h3>
+        <p>Daily emotional check-ins, shared softly.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="soft-room" id="softroom">
+    <h2>The Soft Room</h2>
+    <p>Anonymous venting. Cozy conversations. Healing community vibes.</p>
+  </div>
+
+  <div class="call-to-action">
+    <h2>Healing is hotter together 💕</h2>
+    <a href="#" class="btn pink">Get Started Free</a>
+  </div>
+
+  <div class="footer">
+    <p>Heartbreak Rehab © 2025 | Soft-launching soon ✨</p>
   </div>
 
 </body>
