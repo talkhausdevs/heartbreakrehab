@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Heartbreak Rehab | Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(120deg, #FFD7D7, #FFF3EC, #C7B1DD);
+      background-size: 400% 400%;
+      animation: bgFlow 20s ease infinite;
+      height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+    }
+
+    @keyframes bgFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    header {
+      width: 100%;
+      padding: 30px;
+      text-align: center;
+      color: #5E4B56;
+      font-size: 2em;
+      font-weight: bold;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      margin-top: 20px;
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .container h2 {
+      color: #5E4B56;
+      margin-bottom: 10px;
+    }
+
+    .container p {
+      color: #5E4B56;
+      font-size: 1em;
+      margin-bottom: 20px;
+    }
+
+    .btn-logout {
+      padding: 15px 30px;
+      background-color: #FFC1CC;
+      border: none;
+      border-radius: 30px;
+      color: #5E4B56;
+      font-weight: bold;
+      font-size: 1em;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+
+    .btn-logout:hover {
+      background-color: #FFB3C6;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Emoji_u2728.svg/2048px-Emoji_u2728.svg.png') no-repeat center;
+      background-size: contain;
+      animation: float 6s ease-in-out infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .sparkle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+    .sparkle:nth-child(2) { bottom: 20%; right: 15%; animation-delay: 2s; }
+
+    #loading {
+      margin-top: 100px;
+      color: #5E4B56;
+      font-size: 1.2em;
+    }
+
+    #main-content {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sparkle"></div>
+  <div class="sparkle"></div>
+
+  <header>Welcome back, softie 🫶</header>
+
+  <div id="loading">Loading your vibe... ✨</div>
+
+  <div class="container" id="main-content">
+    <h2>Your Healing Journey</h2>
+    <p>Email: <span id="user-email">loading...</span></p>
+    <p>Healing Stage: <span id="user-healing">Still Crying Over Them 🫠</span></p>
+    <button class="btn-logout" id="logout">Logout 👋</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
+      authDomain: "heartbreak-rehab.firebaseapp.com",
+      projectId: "heartbreak-rehab",
+      storageBucket: "heartbreak-rehab.appspot.com",
+      messagingSenderId: "876119662090",
+      appId: "1:876119662090:web:b2c532417f52c65bf609f3",
+      measurementId: "G-Q31E8JW4GW"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('main-content').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+          } else {
+            window.location.href = "index.html";
+          }
+        });
+      }, 500);
+    });
+
+    document.getElementById('logout').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      }).catch((error) => {
+        alert(error.message);
+      });
+    });
+  </script>
+
+</body>
+</html>

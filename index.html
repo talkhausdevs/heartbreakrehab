@@ -82,36 +82,12 @@
       cursor: pointer;
     }
 
-    .sparkle {
-      position: absolute;
-      width: 25px;
-      height: 25px;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Emoji_u2728.svg/2048px-Emoji_u2728.svg.png') no-repeat center;
-      background-size: contain;
-      animation: float 6s ease-in-out infinite;
-      opacity: 0.5;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-
-    .sparkle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
-    .sparkle:nth-child(2) { bottom: 20%; right: 15%; animation-delay: 2s; }
-
     .hidden { display: none; }
   </style>
 </head>
 <body>
-
-  <div class="sparkle"></div>
-  <div class="sparkle"></div>
-
   <div class="auth-box">
     <h1 id="form-title">Hey softie 👀</h1>
-
     <div id="login-form">
       <input type="email" placeholder="Email">
       <input type="password" placeholder="Password">
@@ -120,7 +96,6 @@
         New here? <a onclick="toggleForm('signup')">Sign up</a>
       </div>
     </div>
-
     <div id="signup-form" class="hidden">
       <input type="text" placeholder="Username">
       <input type="email" placeholder="Email">
@@ -161,7 +136,6 @@
         e.preventDefault();
         const email = document.querySelector('#signup-form input[type="email"]').value;
         const password = document.querySelector('#signup-form input[type="password"]').value;
-
         createUserWithEmailAndPassword(auth, email, password)
           .then(() => {
             alert("Welcome to your soft era 💖");
@@ -176,7 +150,6 @@
         e.preventDefault();
         const email = document.querySelector('#login-form input[type="email"]').value;
         const password = document.querySelector('#login-form input[type="password"]').value;
-
         signInWithEmailAndPassword(auth, email, password)
           .then(() => {
             alert("Welcome back, softie 🫶");
