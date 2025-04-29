@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heartbreak Rehab | Dashboard</title>
+  <title>Heartbreak Rehab | Login</title>
   <style>
     body {
       margin: 0;
@@ -12,12 +12,11 @@
       background: linear-gradient(120deg, #FFD7D7, #FFF3EC, #C7B1DD);
       background-size: 400% 400%;
       animation: bgFlow 20s ease infinite;
-      height: 100vh;
-      overflow-x: hidden;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: start;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
     }
 
     @keyframes bgFlow {
@@ -26,40 +25,36 @@
       100% { background-position: 0% 50%; }
     }
 
-    header {
-      width: 100%;
-      padding: 30px;
-      text-align: center;
-      color: #5E4B56;
-      font-size: 2em;
-      font-weight: bold;
-    }
-
-    .container {
+    .auth-box {
       background: rgba(255, 255, 255, 0.3);
       backdrop-filter: blur(10px);
-      margin-top: 20px;
-      padding: 30px;
       border-radius: 20px;
+      padding: 40px;
       width: 90%;
-      max-width: 500px;
+      max-width: 400px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
       text-align: center;
+      position: relative;
     }
 
-    .container h2 {
-      color: #5E4B56;
-      margin-bottom: 10px;
-    }
-
-    .container p {
-      color: #5E4B56;
-      font-size: 1em;
+    .auth-box h1 {
       margin-bottom: 20px;
+      font-size: 2em;
+      color: #5E4B56;
     }
 
-    .btn-logout {
-      padding: 15px 30px;
+    .auth-box input, .auth-box select {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+    }
+
+    .auth-box button {
+      width: 100%;
+      padding: 15px;
       background-color: #FFC1CC;
       border: none;
       border-radius: 30px;
@@ -67,12 +62,24 @@
       font-weight: bold;
       font-size: 1em;
       cursor: pointer;
-      margin-top: 20px;
-      transition: background 0.3s;
+      transition: 0.3s;
     }
 
-    .btn-logout:hover {
+    .auth-box button:hover {
       background-color: #FFB3C6;
+    }
+
+    .toggle {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #5E4B56;
+    }
+
+    .toggle a {
+      color: #C7B1DD;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
     }
 
     .sparkle {
@@ -94,6 +101,7 @@
     .sparkle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
     .sparkle:nth-child(2) { bottom: 20%; right: 15%; animation-delay: 2s; }
 
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -101,21 +109,39 @@
   <div class="sparkle"></div>
   <div class="sparkle"></div>
 
-  <header>
-    Welcome back, softie 🫶
-  </header>
+  <div class="auth-box">
+    <h1 id="form-title">Hey softie 👀</h1>
 
-  <div class="container">
-    <h2>Your Healing Journey</h2>
-    <p>Email: <span id="user-email">loading...</span></p>
-    <p>Healing Stage: <span id="user-healing">Still Crying Over Them 🫠</span></p>
+    <div id="login-form">
+      <input type="email" placeholder="Email">
+      <input type="password" placeholder="Password">
+      <button>Login</button>
+      <div class="toggle">
+        New here? <a onclick="toggleForm('signup')">Sign up</a>
+      </div>
+    </div>
 
-    <button class="btn-logout" id="logout">Logout 👋</button>
+    <div id="signup-form" class="hidden">
+      <input type="text" placeholder="Username">
+      <input type="email" placeholder="Email">
+      <input type="password" placeholder="Password">
+      <select>
+        <option>Choose Healing Stage</option>
+        <option>🫠 Still Crying Over Them</option>
+        <option>🧃 Soft Launching My Era</option>
+        <option>💅 Ready to Flirt</option>
+        <option>🔥 Back in My Power</option>
+      </select>
+      <button>Sign Up</button>
+      <div class="toggle">
+        Already got a heart? <a onclick="toggleForm('login')">Log in</a>
+      </div>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
@@ -130,28 +156,53 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            document.getElementById('user-email').textContent = user.email;
-          } else {
-            if (!window.location.hash.includes('loggedout')) {
-              window.location.href = "https://talkhausdevs.github.io/heartbreakrehab/";
-            }
-          }
-        });
-      }, 500);
-    });
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelector('#signup-form button').addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = document.querySelector('#signup-form input[type="email"]').value;
+        const password = document.querySelector('#signup-form input[type="password"]').value;
 
-    document.getElementById('logout').addEventListener('click', () => {
-      signOut(auth).then(() => {
-        window.location.href = "https://talkhausdevs.github.io/heartbreakrehab/#loggedout";
-      }).catch((error) => {
-        alert(error.message);
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            alert("Welcome to your soft era 💖");
+            window.location.href = "dashboard.html";
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+      });
+
+      document.querySelector('#login-form button').addEventListener('click', (e) => {
+        e.preventDefault();
+        const email = document.querySelector('#login-form input[type="email"]').value;
+        const password = document.querySelector('#login-form input[type="password"]').value;
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            alert("Welcome back, softie 🫶");
+            window.location.href = "dashboard.html";
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
       });
     });
-  </script>
 
+    window.toggleForm = function(type) {
+      const login = document.getElementById('login-form');
+      const signup = document.getElementById('signup-form');
+      const title = document.getElementById('form-title');
+
+      if (type === 'signup') {
+        login.classList.add('hidden');
+        signup.classList.remove('hidden');
+        title.textContent = 'Let’s start healing 💖';
+      } else {
+        signup.classList.add('hidden');
+        login.classList.remove('hidden');
+        title.textContent = 'Hey softie 👀';
+      }
+    }
+  </script>
 </body>
 </html>
