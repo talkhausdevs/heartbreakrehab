@@ -43,7 +43,7 @@
       color: #5E4B56;
     }
 
-    .auth-box input {
+    .auth-box input, .auth-box select {
       width: 100%;
       padding: 15px;
       margin: 10px 0;
@@ -125,7 +125,7 @@
       <input type="text" placeholder="Username">
       <input type="email" placeholder="Email">
       <input type="password" placeholder="Password">
-      <select style="width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px;">
+      <select>
         <option>Choose Healing Stage</option>
         <option>🫠 Still Crying Over Them</option>
         <option>🧃 Soft Launching My Era</option>
@@ -139,8 +139,60 @@
     </div>
   </div>
 
-  <script>
-    function toggleForm(type) {
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
+      authDomain: "heartbreak-rehab.firebaseapp.com",
+      projectId: "heartbreak-rehab",
+      storageBucket: "heartbreak-rehab.firebasestorage.app",
+      messagingSenderId: "876119662090",
+      appId: "1:876119662090:web:b2c532417f52c65bf609f3",
+      measurementId: "G-Q31E8JW4GW"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const signupBtn = document.querySelector('#signup-form button');
+      if (signupBtn) {
+        signupBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const email = document.querySelector('#signup-form input[type="email"]').value;
+          const password = document.querySelector('#signup-form input[type="password"]').value;
+
+          createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              alert("Welcome to your soft era 💖");
+            })
+            .catch((error) => {
+              alert(error.message);
+            });
+        });
+      }
+
+      const loginBtn = document.querySelector('#login-form button');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const email = document.querySelector('#login-form input[type="email"]').value;
+          const password = document.querySelector('#login-form input[type="password"]').value;
+
+          signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              alert("Welcome back, softie 🫶");
+            })
+            .catch((error) => {
+              alert(error.message);
+            });
+        });
+      }
+    });
+
+    window.toggleForm = function(type) {
       const login = document.getElementById('login-form');
       const signup = document.getElementById('signup-form');
       const title = document.getElementById('form-title');
