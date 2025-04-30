@@ -2,38 +2,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Heartbreak Rehab | Debug Feed</title>
+  <title>Heartbreak Rehab | Feed</title>
   <style>
     body {
-      margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: #fff0f5;
-      padding: 20px;
+      background: linear-gradient(135deg, #FFF3EC, #FFD7D7, #C7B1DD);
+      margin: 0;
+      padding: 40px;
+      color: #5E4B56;
     }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
     .post {
-      background: #ffe6eb;
+      background: #fff5f7;
       padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 10px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 10px;
-      vertical-align: middle;
+
+    .post small {
+      display: block;
+      font-size: 0.8em;
+      color: #888;
+      margin-bottom: 5px;
     }
-    .meta {
-      font-size: 0.85em;
-      color: #555;
+
+    .post h3 {
+      margin: 0;
+      color: #5E4B56;
     }
   </style>
 </head>
 <body>
-  <h1>🔍 Heartbreak Rehab Debug Feed</h1>
-  <div id="feed-posts">Loading entries...</div>
+
+  <h1>💌 Heartbreak Feed</h1>
+  <div id="feed">Loading public entries...</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
@@ -42,64 +54,52 @@
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
-      authDomain: "heartbreak-rehab.appspot.com",
+      authDomain: "heartbreak-rehab.firebaseapp.com",
       projectId: "heartbreak-rehab",
       storageBucket: "heartbreak-rehab.appspot.com",
       messagingSenderId: "876119662090",
-      appId: "1:876119662090:web:b2c532417f52c65bf609f3",
-      measurementId: "G-Q31E8JW4GW"
+      appId: "1:876119662090:web:b2c532417f52c65bf609f3"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const feed = document.getElementById("feed-posts");
+    const feed = document.getElementById("feed");
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) return feed.innerHTML = "<p>Please log in first.</p>";
-      console.log("User logged in:", user.uid);
+      if (!user) return feed.innerHTML = "<p>Please log in to see the feed.</p>";
 
-      try {
-        const entriesQuery = query(
-          collectionGroup(db, "journalEntries"),
-          where("visibility", "==", "public"),
-          orderBy("timestamp", "desc")
-        );
-        const snap = await getDocs(entriesQuery);
+      const entriesQuery = query(
+        collectionGroup(db, "journalEntries"),
+        where("visibility", "==", "public"),
+        orderBy("timestamp", "desc")
+      );
 
-        feed.innerHTML = "";
-        console.log("Fetched journal entries:", snap.size);
+      const snap = await getDocs(entriesQuery);
+      feed.innerHTML = "";
 
-        if (snap.empty) {
-          feed.innerHTML = "<p>No public journal entries found 🥀</p>";
-        }
+      if (snap.empty) {
+        feed.innerHTML = "<p>No public journal entries yet 🕊️</p>";
+        return;
+      }
 
-        for (let entry of snap.docs) {
-          const data = entry.data();
-          const userId = entry.ref.parent.parent.id;
-          const userRef = doc(db, "users", userId);
-          const userDoc = await getDoc(userRef);
-          const userData = userDoc.exists() ? userDoc.data() : { username: "Anonymous", profilePicURL: "" };
-          console.log("Post from:", userData.username);
+      for (let docSnap of snap.docs) {
+        const data = docSnap.data();
+        const userId = docSnap.ref.parent.parent.id;
+        const userDoc = await getDoc(doc(db, "users", userId));
+        const user = userDoc.exists() ? userDoc.data() : { username: "Anonymous" };
+        const time = data.timestamp?.toDate().toLocaleString() || "Unknown time";
 
-          const avatar = userData.profilePicURL || "https://api.dicebear.com/7.x/icons/svg?seed=softie";
-          const time = data.timestamp?.toDate().toLocaleString() || "Unknown time";
-
-          const div = document.createElement("div");
-          div.className = "post";
-          div.innerHTML = `
-            <div class="meta">
-              <img src="${avatar}" class="avatar" /> <strong>${userData.username}</strong> at ${time}
-            </div>
-            <p>${data.entry}</p>
-          `;
-          feed.appendChild(div);
-        }
-      } catch (err) {
-        console.error("Error loading feed:", err);
-        feed.innerHTML = "<p>Error loading feed. Check console.</p>";
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = `
+          <small>${time} — <strong>${user.username}</strong></small>
+          <p>${data.entry}</p>
+        `;
+        feed.appendChild(div);
       }
     });
   </script>
+
 </body>
 </html>

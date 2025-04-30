@@ -3,112 +3,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Heartbreak Rehab | Login</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(120deg, #FFD7D7, #FFF3EC, #C7B1DD);
-      background-size: 400% 400%;
-      animation: bgFlow 20s ease infinite;
+      background: linear-gradient(135deg, #FFD7D7, #FFF3EC, #C7B1DD);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
-      overflow: hidden;
+      margin: 0;
+      animation: bgMove 10s infinite linear;
     }
-    @keyframes bgFlow {
+
+    @keyframes bgMove {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-    .auth-box {
-      background: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 40px;
+
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
       text-align: center;
     }
-    .auth-box h1 {
-      margin-bottom: 20px;
-      font-size: 2em;
-      color: #5E4B56;
-    }
-    .auth-box input, .auth-box select {
+
+    input {
       width: 100%;
-      padding: 15px;
+      padding: 10px;
       margin: 10px 0;
-      border: none;
-      border-radius: 10px;
-      font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
-    .auth-box button {
-      width: 100%;
-      padding: 15px;
-      background-color: #FFC1CC;
+
+    button {
+      background: #FF8FAB;
+      color: white;
       border: none;
-      border-radius: 30px;
-      color: #5E4B56;
-      font-weight: bold;
-      font-size: 1em;
+      padding: 10px 20px;
+      border-radius: 20px;
       cursor: pointer;
-      transition: 0.3s;
+      margin-top: 10px;
     }
-    .auth-box button:hover {
-      background-color: #FFB3C6;
-    }
-    .toggle {
-      margin-top: 20px;
-      font-size: 0.9em;
+
+    h1 {
       color: #5E4B56;
     }
-    .toggle a {
-      color: #C7B1DD;
-      font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="auth-box">
-    <h1 id="form-title">Hey softie 👀</h1>
-    <div id="login-form">
-      <input type="email" placeholder="Email">
-      <input type="password" placeholder="Password">
-      <button>Login</button>
-      <div class="toggle">
-        New here? <a onclick="toggleForm('signup')">Sign up</a>
-      </div>
-    </div>
-    <div id="signup-form" class="hidden">
-      <input type="text" placeholder="Username">
-      <input type="email" placeholder="Email">
-      <input type="password" placeholder="Password">
-      <select>
-        <option>Choose Healing Stage</option>
-        <option>🫠 Still Crying Over Them</option>
-        <option>🧃 Soft Launching My Era</option>
-        <option>💅 Ready to Flirt</option>
-        <option>🔥 Back in My Power</option>
-      </select>
-      <button>Sign Up</button>
-      <div class="toggle">
-        Already got a heart? <a onclick="toggleForm('login')">Log in</a>
-      </div>
-    </div>
+
+  <div class="login-box">
+    <h1>Heartbreak Rehab 💔</h1>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Sign Up</button>
+    <p id="msg" style="color: red;"></p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
@@ -116,71 +77,28 @@
       projectId: "heartbreak-rehab",
       storageBucket: "heartbreak-rehab.appspot.com",
       messagingSenderId: "876119662090",
-      appId: "1:876119662090:web:b2c532417f52c65bf609f3",
-      measurementId: "G-Q31E8JW4GW"
+      appId: "1:876119662090:web:b2c532417f52c65bf609f3"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelector('#signup-form button').addEventListener('click', async (e) => {
-        e.preventDefault();
-        const username = document.querySelector('#signup-form input[placeholder="Username"]').value;
-        const email = document.querySelector('#signup-form input[placeholder="Email"]').value;
-        const password = document.querySelector('#signup-form input[placeholder="Password"]').value;
-        const healingStage = document.querySelector('#signup-form select').value;
+    window.login = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => window.location.href = "dashboard.html")
+        .catch(e => document.getElementById("msg").innerText = e.message);
+    };
 
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-
-          await setDoc(doc(db, "users", user.uid), {
-            username,
-            email,
-            healingStage,
-            createdAt: serverTimestamp()
-          });
-
-          alert("Welcome to your soft era 💖");
-          window.location.href = "feed.html";
-        } catch (error) {
-          alert(error.message);
-        }
-      });
-
-      document.querySelector('#login-form button').addEventListener('click', (e) => {
-        e.preventDefault();
-        const email = document.querySelector('#login-form input[type="email"]').value;
-        const password = document.querySelector('#login-form input[type="password"]').value;
-
-        signInWithEmailAndPassword(auth, email, password)
-          .then(() => {
-            alert("Welcome back, softie 🫶");
-            window.location.href = "feed.html";
-          })
-          .catch((error) => {
-            alert(error.message);
-          });
-      });
-    });
-
-    window.toggleForm = function(type) {
-      const login = document.getElementById('login-form');
-      const signup = document.getElementById('signup-form');
-      const title = document.getElementById('form-title');
-
-      if (type === 'signup') {
-        login.classList.add('hidden');
-        signup.classList.remove('hidden');
-        title.textContent = 'Let’s start healing 💖';
-      } else {
-        signup.classList.add('hidden');
-        login.classList.remove('hidden');
-        title.textContent = 'Hey softie 👀';
-      }
-    }
+    window.signup = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => window.location.href = "dashboard.html")
+        .catch(e => document.getElementById("msg").innerText = e.message);
+    };
   </script>
+
 </body>
 </html>

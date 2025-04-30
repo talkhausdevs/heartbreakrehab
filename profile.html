@@ -2,69 +2,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Softie Profile | Heartbreak Rehab</title>
+  <title>Heartbreak Rehab | Profile</title>
   <style>
     body {
-      margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #FFD7D7, #FFF3EC, #C7B1DD);
-      background-size: 300% 300%;
-      animation: bgFlow 15s ease infinite;
+      background: linear-gradient(135deg, #C7B1DD, #FFD7D7, #FFF3EC);
+      margin: 0;
+      padding: 40px;
+      color: #5E4B56;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
     }
-    @keyframes bgFlow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .profile-card {
-      background: rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 40px;
-      width: 90%;
+
+    .profile-box {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 100%;
       max-width: 500px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-      color: #5E4B56;
-      text-align: center;
     }
-    input, select, textarea {
+
+    input, textarea, select {
       width: 100%;
       padding: 10px;
-      margin: 5px 0 15px;
+      margin-top: 10px;
+      margin-bottom: 20px;
       border-radius: 10px;
-      border: none;
+      border: 1px solid #ccc;
       font-family: inherit;
     }
+
     button {
-      background: #FFC1CC;
+      background: #FF8FAB;
+      color: white;
       border: none;
-      padding: 12px 25px;
-      border-radius: 30px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .tag {
-      display: inline-block;
-      background: #FFB3C6;
-      color: #5E4B56;
-      padding: 6px 12px;
+      padding: 10px 20px;
       border-radius: 20px;
-      font-size: 0.9em;
-      margin: 5px;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <div class="profile-card" id="profile">
-    <h1>Loading softie profile...</h1>
-  </div>
+  <div class="profile-box" id="profile">Loading profile...</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
@@ -77,74 +63,67 @@
       projectId: "heartbreak-rehab",
       storageBucket: "heartbreak-rehab.appspot.com",
       messagingSenderId: "876119662090",
-      appId: "1:876119662090:web:b2c532417f52c65bf609f3",
-      measurementId: "G-Q31E8JW4GW"
+      appId: "1:876119662090:web:b2c532417f52c65bf609f3"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-
     const params = new URLSearchParams(window.location.search);
     let uid = params.get("uid");
-    const profileCard = document.getElementById("profile");
 
-    let currentUser = null;
+    const profileBox = document.getElementById("profile");
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) return profileCard.innerHTML = "<h1>Login required to view profiles 🕊️</h1>";
-      currentUser = user;
+      if (!user) return profileBox.innerHTML = "<p>Please log in.</p>";
       if (!uid) uid = user.uid;
+      const isMe = uid === user.uid;
 
-      const isOwner = currentUser.uid === uid;
       const userRef = doc(db, "users", uid);
       const snap = await getDoc(userRef);
-      if (!snap.exists()) return profileCard.innerHTML = "<h1>Softie not found 🕊️</h1>";
+      const data = snap.exists() ? snap.data() : {};
 
-      const data = snap.data();
       const journalRef = collection(db, "users", uid, "journalEntries");
       const publicQuery = query(journalRef, where("visibility", "==", "public"));
-      const journalSnap = await getDocs(publicQuery);
-      const entryCount = journalSnap.size;
+      const publicSnap = await getDocs(publicQuery);
+      const publicCount = publicSnap.size;
 
-      if (isOwner) {
-        profileCard.innerHTML = `
-          <h1>Edit Your Softie Profile</h1>
-          <input id="username" value="${data.username || ""}" placeholder="Username" />
-          <select id="healing">
-            <option value="">Choose Healing Stage</option>
-            <option ${data.healingStage==="🫠 Still Crying Over Them"?"selected":""}>🫠 Still Crying Over Them</option>
-            <option ${data.healingStage==="🧃 Soft Launching My Era"?"selected":""}>🧃 Soft Launching My Era</option>
-            <option ${data.healingStage==="💅 Ready to Flirt"?"selected":""}>💅 Ready to Flirt</option>
-            <option ${data.healingStage==="🔥 Back in My Power"?"selected":""}>🔥 Back in My Power</option>
+      if (isMe) {
+        profileBox.innerHTML = `
+          <h2>Your Softie Profile</h2>
+          <input id="username" value="${data.username || ''}" placeholder="Username">
+          <select id="healingStage">
+            <option value="">Choose your healing stage</option>
+            <option ${data.healingStage === "Still Crying" ? "selected" : ""}>Still Crying</option>
+            <option ${data.healingStage === "Soft Launching" ? "selected" : ""}>Soft Launching</option>
+            <option ${data.healingStage === "Ready to Flirt" ? "selected" : ""}>Ready to Flirt</option>
+            <option ${data.healingStage === "Back in My Power" ? "selected" : ""}>Back in My Power</option>
           </select>
-          <textarea id="bio" placeholder="Your softie bio">${data.bio || ""}</textarea>
-          <input id="lookingFor" value="${data.lookingFor || ""}" placeholder="What are you looking for?" />
-          <button id="save">Save Changes</button>
-          <p style="margin-top: 15px"><strong>Public Posts:</strong> ${entryCount}</p>
+          <textarea id="bio" placeholder="About you...">${data.bio || ''}</textarea>
+          <input id="lookingFor" value="${data.lookingFor || ''}" placeholder="Looking for...">
+          <button onclick="saveProfile()">Save</button>
+          <p style="margin-top:10px;">You have ${publicCount} public journal ${publicCount === 1 ? "entry" : "entries"}.</p>
         `;
-
-        document.getElementById("save").addEventListener("click", async () => {
-          const updatedData = {
+        window.saveProfile = async () => {
+          await setDoc(userRef, {
             username: document.getElementById("username").value,
-            healingStage: document.getElementById("healing").value,
+            healingStage: document.getElementById("healingStage").value,
             bio: document.getElementById("bio").value,
             lookingFor: document.getElementById("lookingFor").value
-          };
-          await setDoc(userRef, updatedData, { merge: true });
-          alert("Profile updated ✨");
-          window.location.reload();
-        });
+          }, { merge: true });
+          alert("Profile saved! 🫶");
+        };
       } else {
-        profileCard.innerHTML = `
-          <h1>${data.username}</h1>
-          <div class="tag">${data.healingStage || "💔 Healing Unknown"}</div>
-          <p><strong>Looking for:</strong> ${data.lookingFor || "🤷‍♀️ Undefined"}</p>
-          <p><strong>About Me:</strong> ${data.bio || "No bio yet, just vibes."}</p>
-          <p><strong>Public Posts:</strong> ${entryCount}</p>
+        profileBox.innerHTML = `
+          <h2>${data.username || "Softie"}</h2>
+          <p><strong>Healing stage:</strong> ${data.healingStage || "Unknown"}</p>
+          <p><strong>Bio:</strong><br>${data.bio || "No bio yet."}</p>
+          <p><strong>Looking for:</strong> ${data.lookingFor || "Not shared."}</p>
+          <p>This softie has ${publicCount} public journal ${publicCount === 1 ? "entry" : "entries"}.</p>
         `;
       }
     });
   </script>
+
 </body>
 </html>
