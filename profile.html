@@ -48,7 +48,17 @@
     }
   </style>
 </head>
-<body>
+
+  <body>
+    <nav>
+      <a class="back-btn" href="feed.html">← Back to Feed</a>
+      <div>
+        <a href="dashboard.html">📖 Journal</a>
+        <a href="profile.html">👤 Profile</a>
+        <a href="#" onclick="logout()">🚪 Logout</a>
+      </div>
+    </nav>
+  
 
   <div class="profile-box" id="profile">Loading profile...</div>
 
@@ -75,6 +85,7 @@
     const profileBox = document.getElementById("profile");
 
     onAuthStateChanged(auth, async (user) => {
+window.logout = () => signOut(auth).then(() => location.href = "index.html");
       if (!user) return profileBox.innerHTML = "<p>Please log in.</p>";
       if (!uid) uid = user.uid;
       const isMe = uid === user.uid;
