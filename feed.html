@@ -81,6 +81,9 @@
       padding: 20px;
       margin-bottom: 20px;
       border-radius: 15px;
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
     }
 
     .post small {
@@ -94,6 +97,18 @@
       color: #5E4B56;
       font-weight: bold;
       text-decoration: none;
+    }
+
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .post-content {
+      flex: 1;
     }
   </style>
 </head>
@@ -178,9 +193,13 @@
 
         const post = document.createElement("div");
         post.className = "post";
+        const avatarURL = user.profilePicURL || "https://via.placeholder.com/50";
         post.innerHTML = `
-          <small>${time} — <a href="profile.html?uid=${userId}">${user.username}</a></small>
-          <p>${data.entry}</p>
+          <img class="avatar" src="${avatarURL}" alt="avatar" />
+          <div class="post-content">
+            <small>${time} — <a href="profile.html?uid=${userId}">${user.username}</a></small>
+            <p>${data.entry}</p>
+          </div>
         `;
         feedContainer.appendChild(post);
       }
