@@ -10,8 +10,35 @@
       font-family: 'Poppins', sans-serif;
       background: linear-gradient(135deg, #FFD7D7, #FFF3EC, #C7B1DD);
       margin: 0;
-      padding: 40px;
+      padding: 80px 20px 40px;
       color: #5E4B56;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      z-index: 999;
+    }
+
+    nav a {
+      color: #5E4B56;
+      text-decoration: none;
+      font-weight: bold;
+      margin-right: 15px;
+    }
+
+    nav .back-btn {
+      font-size: 1em;
+      color: #FF8FAB;
     }
 
     h1, h2 {
@@ -63,7 +90,17 @@
 </head>
 <body>
 
+  <nav>
+    <a class="back-btn" href="feed.html">← Back to Feed</a>
+    <div>
+      <a href="dashboard.html">📖 Journal</a>
+      <a href="profile.html">👤 Profile</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
+  </nav>
+
   <h1>Welcome back, softie 💌</h1>
+
   <div class="entry-box">
     <h2>Write a New Journal Entry</h2>
     <textarea id="entryText" rows="4" placeholder="What's on your heart today?"></textarea>
@@ -78,7 +115,6 @@
   <div class="entry-box">
     <h2>Your Journal Archive</h2>
     <div id="journalList">Loading...</div>
-    <button onclick="logout()">Logout 👋</button>
   </div>
 
   <script type="module">
@@ -98,7 +134,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     let currentUser;
 
     onAuthStateChanged(auth, async (user) => {
