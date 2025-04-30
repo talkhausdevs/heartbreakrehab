@@ -207,14 +207,23 @@
         where("visibility", "==", "public"),
         orderBy("timestamp", "desc")
       );
-      const snap = await getDocs(q);
-      feed.innerHTML = "";
+      let snap;
+      try {
+        snap = await getDocs(q);
+      } catch (err) {
+        console.error("Feed load error:", err);
+        feed.innerHTML = "<p style='text-align:center;color:#800080;'>Failed to load feed 😔</p>";
+        return;
+      }
+      feed.innerHTML = "<h2 style='text-align:center;font-size:10px;'>📝 Latest Entries</h2>";
 
       for (let docSnap of snap.docs) {
         const data = docSnap.data();
         const uid = docSnap.ref.parent.parent.id;
         const userDoc = await getDoc(doc(db, "users", uid));
         const user = userDoc.exists() ? userDoc.data() : { username: "Softie", profilePicURL: "", healingStage: "" };
+         if (!user.username) user.username = "Softie";
+         if (!user.healingStage) user.healingStage = "Unknown Phase";
         const time = data.timestamp?.toDate().toLocaleString() || "Unknown time";
         const avatar = user.profilePicURL || "https://api.dicebear.com/7.x/icons/svg?seed=softie";
         const healing = user.healingStage || "Unknown Phase";
