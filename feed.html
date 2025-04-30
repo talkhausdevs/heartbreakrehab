@@ -4,20 +4,20 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Heartbreak Feed | Heartbreak Rehab</title>
+  <title>Heartbreak Rehab | Feed</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Press Start 2P', cursive;
       background: linear-gradient(145deg, #b8b3ff, #f0c8ff, #ffe2f5);
       background-size: 400% 400%;
-      animation: glitterGlow 12s ease infinite;
+      animation: glitterFlow 12s ease infinite;
       margin: 0;
-      padding: 80px 20px 40px;
+      padding: 80px 10px 40px;
       color: #2f2f2f;
     }
 
-    @keyframes glitterGlow {
+    @keyframes glitterFlow {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
@@ -44,34 +44,85 @@
       margin-left: 10px;
     }
 
-    h1 {
+    .bubbles {
+      display: flex;
+      overflow-x: auto;
+      gap: 15px;
+      padding: 10px 0;
+      margin: 20px 0;
+      border-bottom: 2px dashed #a64ac9;
+    }
+
+    .bubble {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
-      margin: 30px 0;
+      font-size: 8px;
       color: #6a006a;
-      font-size: 18px;
+    }
+
+    .bubble img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #FF69B4;
+    }
+
+    .composer {
+      background: #ffffffdd;
+      border: 3px dashed #c97dff;
+      padding: 20px;
+      margin: 10px auto;
+      max-width: 600px;
+      border-radius: 12px;
+    }
+
+    textarea, select, button {
+      width: 100%;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 11px;
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #b28dd5;
+    }
+
+    button {
+      background: #FF69B4;
+      color: white;
+      cursor: pointer;
     }
 
     .post {
       background: #ffffffdd;
       border: 3px dotted #c97dff;
-      padding: 20px;
+      padding: 15px;
       border-radius: 15px;
-      margin: 0 auto 25px;
+      margin: 20px auto;
       max-width: 600px;
-      box-shadow: 0 0 10px #bfa8ff;
+      box-shadow: 0 0 10px #d8c3ff;
     }
 
     .post small {
       display: block;
-      font-size: 10px;
+      font-size: 9px;
       color: #777;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
 
     .post p {
-      font-size: 11px;
+      font-size: 10px;
       white-space: pre-wrap;
-      word-break: break-word;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      margin-right: 8px;
+      vertical-align: middle;
+      border: 2px solid #800080;
     }
   </style>
 </head>
@@ -80,19 +131,29 @@
   <nav>
     <strong>💔 Heartbreak Feed</strong>
     <div>
-      <a href="dashboard.html">📓 Journal</a>
       <a href="profile.html">👤 Profile</a>
       <a href="#" onclick="logout()">🚪 Logout</a>
     </div>
   </nav>
 
-  <h1>✨Public Journal Entries✨</h1>
+  <div class="bubbles" id="softieBubbles">Loading softies...</div>
+
+  <div class="composer">
+    <textarea id="entryText" rows="3" placeholder="What's breaking your heart?"></textarea>
+    <select id="visibility">
+      <option value="public">🌤️ Public</option>
+      <option value="private">🌙 Private</option>
+    </select>
+    <button onclick="postEntry()">Post Entry</button>
+    <p id="statusMsg" style="color:green;font-size:9px;"></p>
+  </div>
+
   <div id="feed">Loading...</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-    import { getFirestore, collectionGroup, getDocs, getDoc, doc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getFirestore, collectionGroup, getDocs, collection, doc, addDoc, getDoc, setDoc, serverTimestamp, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
@@ -106,44 +167,92 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
     const feed = document.getElementById("feed");
+    const statusMsg = document.getElementById("statusMsg");
+    const bubbles = document.getElementById("softieBubbles");
+
+    let currentUser;
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) return feed.innerHTML = "<p>Please log in to view the feed.</p>";
+      if (!user) return window.location.href = "index.html";
+      currentUser = user;
       window.logout = () => signOut(auth).then(() => location.href = "index.html");
+      loadFeed();
+      loadBubbles();
+    });
 
-      const entriesQuery = query(
+    async function postEntry() {
+      const text = document.getElementById("entryText").value.trim();
+      const visibility = document.getElementById("visibility").value;
+      if (!text) return;
+
+      const userRef = doc(db, "users", currentUser.uid);
+      const journalRef = collection(userRef, "journalEntries");
+
+      await addDoc(journalRef, {
+        entry: text,
+        visibility,
+        timestamp: serverTimestamp()
+      });
+
+      document.getElementById("entryText").value = "";
+      statusMsg.innerText = "Posted successfully!";
+      loadFeed();
+    }
+
+    async function loadFeed() {
+      const q = query(
         collectionGroup(db, "journalEntries"),
         where("visibility", "==", "public"),
         orderBy("timestamp", "desc")
       );
-
-      const snap = await getDocs(entriesQuery);
+      const snap = await getDocs(q);
       feed.innerHTML = "";
-
-      if (snap.empty) {
-        feed.innerHTML = "<p>No public entries yet. 🕊️</p>";
-        return;
-      }
 
       for (let docSnap of snap.docs) {
         const data = docSnap.data();
-        const userId = docSnap.ref.parent.parent.id;
-        const userDoc = await getDoc(doc(db, "users", userId));
-        const user = userDoc.exists() ? userDoc.data() : { username: "Softie", profilePicURL: "" };
+        const uid = docSnap.ref.parent.parent.id;
+        const userDoc = await getDoc(doc(db, "users", uid));
+        const user = userDoc.exists() ? userDoc.data() : { username: "Softie", profilePicURL: "", healingStage: "" };
         const time = data.timestamp?.toDate().toLocaleString() || "Unknown time";
-
         const avatar = user.profilePicURL || "https://api.dicebear.com/7.x/icons/svg?seed=softie";
+        const healing = user.healingStage || "Unknown Phase";
+
         const div = document.createElement("div");
         div.className = "post";
         div.innerHTML = `
-          <img src="${avatar}" style="width:40px;height:40px;border-radius:8px;border:2px solid #c97dff;" alt="avatar"/><div><small>${time} — <a href='profile.html?uid=${userId}' style="color:#800080;text-decoration:none;">${user.username}</a></small>
-          <p>${data.entry}</p></div>
+          <small>
+            <img src="${avatar}" class="avatar"/>
+            <a href="profile.html?uid=${uid}" style="color:#800080;text-decoration:none;">${user.username}</a> —
+            <a href="phase.html?healingStage=${healing}" style="color:#FF69B4;">${healing}</a>
+            <br>${time}
+          </small>
+          <p>${data.entry}</p>
         `;
         feed.appendChild(div);
       }
-    });
-  </script>
+    }
 
+    async function loadBubbles() {
+      const usersRef = collection(db, "users");
+      const usersSnap = await getDocs(usersRef);
+      bubbles.innerHTML = "";
+      usersSnap.forEach(doc => {
+        const data = doc.data();
+        const avatar = data.profilePicURL || "https://api.dicebear.com/7.x/icons/svg?seed=softie";
+        const username = data.username || "Softie";
+        const div = document.createElement("div");
+        div.className = "bubble";
+        div.innerHTML = `
+          <a href="profile.html?uid=${doc.id}">
+            <img src="${avatar}" alt="${username}" />
+            <span>${username}</span>
+          </a>
+        `;
+        bubbles.appendChild(div);
+      });
+    }
+  </script>
 </body>
 </html>
