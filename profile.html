@@ -86,18 +86,17 @@
     const auth = getAuth(app);
 
     const params = new URLSearchParams(window.location.search);
-    const uid = params.get("uid");
+    let uid = params.get("uid");
     const profileCard = document.getElementById("profile");
 
     let currentUser = null;
 
     onAuthStateChanged(auth, async (user) => {
-      if (!uid) return profileCard.innerHTML = "<h1>Oops! No user ID provided 💔</h1>";
       if (!user) return profileCard.innerHTML = "<h1>Login required to view profiles 🕊️</h1>";
-
       currentUser = user;
-      const isOwner = currentUser.uid === uid;
+      if (!uid) uid = user.uid;
 
+      const isOwner = currentUser.uid === uid;
       const userRef = doc(db, "users", uid);
       const snap = await getDoc(userRef);
       if (!snap.exists()) return profileCard.innerHTML = "<h1>Softie not found 🕊️</h1>";
