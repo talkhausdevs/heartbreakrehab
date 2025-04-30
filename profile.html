@@ -2,8 +2,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Softie Profile | Heartbreak Rehab</title>
   <style>
     body {
@@ -33,13 +33,21 @@
       color: #5E4B56;
       text-align: center;
     }
-    h1 {
-      font-size: 2em;
-      margin-bottom: 10px;
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      border-radius: 10px;
+      border: none;
+      font-family: inherit;
     }
-    p {
-      font-size: 1em;
-      margin: 8px 0;
+    button {
+      background: #FFC1CC;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
     }
     .tag {
       display: inline-block;
@@ -60,7 +68,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
@@ -74,24 +83,24 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     const params = new URLSearchParams(window.location.search);
     const uid = params.get("uid");
-
     const profileCard = document.getElementById("profile");
 
-    async function loadProfile() {
-      if (!uid) {
-        profileCard.innerHTML = "<h1>Oops! No user ID provided 💔</h1>";
-        return;
-      }
+    let currentUser = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!uid) return profileCard.innerHTML = "<h1>Oops! No user ID provided 💔</h1>";
+      if (!user) return profileCard.innerHTML = "<h1>Login required to view profiles 🕊️</h1>";
+
+      currentUser = user;
+      const isOwner = currentUser.uid === uid;
 
       const userRef = doc(db, "users", uid);
       const snap = await getDoc(userRef);
-      if (!snap.exists()) {
-        profileCard.innerHTML = "<h1>Softie not found 🕊️</h1>";
-        return;
-      }
+      if (!snap.exists()) return profileCard.innerHTML = "<h1>Softie not found 🕊️</h1>";
 
       const data = snap.data();
       const journalRef = collection(db, "users", uid, "journalEntries");
@@ -99,16 +108,44 @@
       const journalSnap = await getDocs(publicQuery);
       const entryCount = journalSnap.size;
 
-      profileCard.innerHTML = `
-        <h1>${data.username}</h1>
-        <div class="tag">${data.healingStage || "💔 Healing Unknown"}</div>
-        <p><strong>Looking for:</strong> ${data.lookingFor || "🤷‍♀️ Undefined"}</p>
-        <p><strong>About Me:</strong> ${data.bio || "No bio yet, just vibes."}</p>
-        <p><strong>Public Posts:</strong> ${entryCount}</p>
-      `;
-    }
+      if (isOwner) {
+        profileCard.innerHTML = `
+          <h1>Edit Your Softie Profile</h1>
+          <input id="username" value="${data.username || ""}" placeholder="Username" />
+          <select id="healing">
+            <option value="">Choose Healing Stage</option>
+            <option ${data.healingStage==="🫠 Still Crying Over Them"?"selected":""}>🫠 Still Crying Over Them</option>
+            <option ${data.healingStage==="🧃 Soft Launching My Era"?"selected":""}>🧃 Soft Launching My Era</option>
+            <option ${data.healingStage==="💅 Ready to Flirt"?"selected":""}>💅 Ready to Flirt</option>
+            <option ${data.healingStage==="🔥 Back in My Power"?"selected":""}>🔥 Back in My Power</option>
+          </select>
+          <textarea id="bio" placeholder="Your softie bio">${data.bio || ""}</textarea>
+          <input id="lookingFor" value="${data.lookingFor || ""}" placeholder="What are you looking for?" />
+          <button id="save">Save Changes</button>
+          <p style="margin-top: 15px"><strong>Public Posts:</strong> ${entryCount}</p>
+        `;
 
-    loadProfile();
+        document.getElementById("save").addEventListener("click", async () => {
+          const updatedData = {
+            username: document.getElementById("username").value,
+            healingStage: document.getElementById("healing").value,
+            bio: document.getElementById("bio").value,
+            lookingFor: document.getElementById("lookingFor").value
+          };
+          await setDoc(userRef, updatedData, { merge: true });
+          alert("Profile updated ✨");
+          window.location.reload();
+        });
+      } else {
+        profileCard.innerHTML = `
+          <h1>${data.username}</h1>
+          <div class="tag">${data.healingStage || "💔 Healing Unknown"}</div>
+          <p><strong>Looking for:</strong> ${data.lookingFor || "🤷‍♀️ Undefined"}</p>
+          <p><strong>About Me:</strong> ${data.bio || "No bio yet, just vibes."}</p>
+          <p><strong>Public Posts:</strong> ${entryCount}</p>
+        `;
+      }
+    });
   </script>
 </body>
 </html>
