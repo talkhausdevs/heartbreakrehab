@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Login | Heartbreak Rehab</title>
+  <title>Sign Up | Heartbreak Rehab</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     body {
@@ -68,15 +68,15 @@
     <img src="heartbreak-rehab-pixel-logo.png" alt="Heartbreak Rehab Pixel Logo"/>
     <input type="email" id="email" placeholder="EMAIL" />
     <input type="password" id="password" placeholder="PASSWORD" />
-    <button onclick="login()">LOGIN</button>
+    <button onclick="signup()">SIGN UP</button>
     <br>
-    <a href="signup.html">✨ CREATE ACCOUNT ✨</a>
+    <a href="index.html">← BACK TO LOGIN</a>
     <p id="msg"></p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCZRdLM7qYlHmeBUgIXg79t3buDfE8U2G0",
@@ -90,10 +90,10 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    window.login = () => {
+    window.signup = () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      signInWithEmailAndPassword(auth, email, password)
+      createUserWithEmailAndPassword(auth, email, password)
         .then(() => window.location.href = "feed.html")
         .catch(e => document.getElementById("msg").innerText = e.message);
     };
